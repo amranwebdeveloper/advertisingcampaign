@@ -1,0 +1,69 @@
+version: '3.7'
+
+services:
+  # PHP-FPM - Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www
+
+    volumes:
+    - ./:/var/www
+    - ./docker-files/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+    networks:
+    - app-network
+
+  # NGINX - Service
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
+
+    ports:
+    - "8080:80"
+
+    volumes:
+    - ./:/var/www
+    - ./docker-files/nginx/conf.d/:/etc/nginx/conf.d/
+
+    networks:
+    - app-network
+
+  #MySQL Service
+  db:
+    image: mysql:8.0.21
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+    - "3306:3306"
+    
+    environment:
+      MYSQL_DATABASE: advertisingcampaign
+      MYSQL_ROOT_PASSWORD: 
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+
+    volumes:
+    - mysql:/var/lib/mysql
+    - ./docker-files/mysql/my.cnf:/etc/mysql/my.cnf
+
+    networks:
+    - app-network
+
+# Volumes
+volumes:
+  mysql:
+    driver: local
+
+# Networks
+networks:
+  app-network:
+    driver: bridge
