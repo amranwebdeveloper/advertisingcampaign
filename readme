@@ -1,0 +1,4 @@
+1. update composer
+2.  update .env as your environment
+3. migrate db
+4. you can find your project to route url
